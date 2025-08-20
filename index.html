@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La soga</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="root">
+    <!-- Pantalla de título -->
+    <div id="main-title">
+      <div id="main-title-box">
+        <h1>La soga</h1>
+      </div>
+      <div id="main-buttons-box">
+        <button class="main-title-button" id="play-button" type="button">Jugar</button>
+        <button class="main-title-button" type="button">Opciones</button>
+      </div>
+    </div>
+    <!-- Canvas del juego -->
+    <div id="game">
+      <div class="timer">
+        <span id="time">99</span>
+      </div>
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+  <script src="levels.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
