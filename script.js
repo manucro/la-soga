@@ -5,8 +5,12 @@
 // Constantes
 const playButton = document.getElementById('play-button');
 const mainTitle = document.getElementById('main-title');
+const levelSelector = document.getElementById('level-selector');
+const levelSelectorBox = document.getElementById('level-selector-box');
 const gameElement = document.getElementById('game');
 const timeElement = document.getElementById('time');
+const backButtonLevelSelector = document.getElementById('level-selector-back-button');
+const backButtonGame = document.getElementById('game-back-button');
 
 const boxSize = 32;
 const gameDelay = 200;
@@ -29,7 +33,7 @@ const DIRECTIONS = {
 
 // Variables
 let gameMainLoop, gameClock, playerObj, playerDirection;
-let actualLevel, actualLevelObj, actualLevelArr;
+let actualLevelObj, actualLevelArr;
 let levelDimensions = [10, 10];
 let timer = 0;
 let positionsQuery = [];
@@ -91,11 +95,44 @@ class Player {
 // Eventos de menús
 playButton.addEventListener('click', () => {
   mainTitle.style.display = 'none';
-  gameElement.style.display = 'flex';
-  setLevel(0);
-  gameInit();
+  levelSelector.style.display = 'flex';
 });
 
+function updateLevelSelectorLevels() {
+  const levelElements = document.createDocumentFragment();
+  const keys = Object.keys(levels);
+  keys.forEach(key => {
+    const l = document.createElement('button');
+    l.type = 'button';
+    l.classList.add('level');
+    const text = (parseInt(key) + 1).toString();
+    l.innerText = (key < 9) ? `0${text}` : text;
+    const lT = document.createElement('div');
+    lT.classList.add('level-tooltip');
+    lT.innerText = levels[key].name;
+    l.appendChild(lT);
+    l.addEventListener('click', () => selectLevel(levels[key]));
+    levelElements.appendChild(l);
+  });
+  levelSelectorBox.appendChild(levelElements);
+}
+updateLevelSelectorLevels();
+
+function selectLevel(level) {
+  levelSelector.style.display = 'none';
+  gameElement.style.display = 'flex';
+  setLevel(level);
+  gameInit();
+}
+backButtonLevelSelector.addEventListener('click', () => {
+  levelSelector.style.display = 'none';
+  mainTitle.style.display = 'flex';
+});
+backButtonGame.addEventListener('click', () => {
+  gameElement.style.display = 'none';
+  levelSelector.style.display = 'flex';
+  clearInterval(gameMainLoop);
+});
 
 
 // Funciones del juego
@@ -117,8 +154,7 @@ function drawMap(level) {
 
 function setLevel(level) {
   // Establece las distintas variables para comenzar un nivel
-  actualLevel = level;
-  actualLevelObj = levels[level]
+  actualLevelObj = level;
   actualLevelArr = actualLevelObj.array;
   levelDimensions = [actualLevelArr[0].length, actualLevelArr.length];
   timer = actualLevelObj.time;

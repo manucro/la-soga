@@ -7,11 +7,22 @@
   --background1: #111;
   --background2: #333;
   --text: #ccc;
+  --modal-color: #0e0e0e;
+  --button-color: #2a2a2a;
+  --button-highlight: #3a3a3a;
+  --tooltip-color: #080808;
+  --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-bg: 2rem;
   --spacing-xb: 4rem;
+  --font-size-sml: 20px;
+  --font-size-mid: 32px;
+  --font-size-big: 40px;
+  --font-size-xxl: 60px;
 }
+button:hover { filter: brightness(125%); }
+button:active { border: none; }
 
 #root {
   display: flex;
@@ -26,7 +37,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  font-size: 60px;
+  font-size: var(--font-size-xxl);
 }
 #main-title-box {
   flex: 1;
@@ -44,7 +55,7 @@
 .main-title-button {
   width: 50%;
   padding: var(--spacing-md);
-  font-size: 20px;
+  font-size: var(--font-size-mid);
   cursor: pointer;
 }
 
@@ -57,10 +68,70 @@
   height: 100%;
 }
 .timer {
-  font-size: 40px;
+  font-size: var(--font-size-big);
 }
 #canvas {
   max-width: 90vw;
   max-height: 90vh;
   border: 2px solid red;
+}
+
+#level-selector {
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+#level-selector-box {
+  display: grid;
+  grid-template: repeat(2, auto) / repeat(5, auto);
+  background-color: var(--modal-color);
+  border-radius: var(--spacing-sm);
+}
+.level {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: var(--spacing-bg);
+  padding: var(--spacing-bg);
+  background-color: var(--button-color);
+  border: none;
+  border-bottom: var(--spacing-xs) solid var(--button-highlight);
+  border-radius: var(--spacing-sm);
+  color: var(--font);
+  font-size: 32px;
+  cursor: pointer;
+  user-select: none;
+}
+.level-tooltip {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 150%;
+  position: absolute;
+  top: -50%;
+  background-color: var(--tooltip-color);
+  border-radius: var(--spacing-sm);
+  font-size: var(--font-size-sml);
+  font-weight: bold;
+  text-align: center;
+  padding: var(--spacing-sm);
+}
+.level:hover .level-tooltip {
+  display: flex;
+}
+
+.back-button {
+  position: absolute;
+  top: var(--spacing-bg);
+  left: var(--spacing-bg);
+  padding: var(--spacing-md);
+  border: none;
+  border-radius: var(--spacing-sm);
+  border-bottom: var(--spacing-xs) solid var(--button-color);
+  font-size: var(--font-size-sm);
+  background-color: var(--modal-color);
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
 }

@@ -18,10 +18,19 @@
         <button class="main-title-button" type="button">Opciones</button>
       </div>
     </div>
+    <!-- Selector de niveles -->
+     <div id="level-selector">
+        <button type="button" class="back-button" id="level-selector-back-button"> &lt; </button>
+        <div id="level-selector-box"></div>
+     </div>
     <!-- Canvas del juego -->
     <div id="game">
+      <button type="button" class="back-button" id="game-back-button"> &lt; </button>
       <div class="timer">
+        <img class="timer-icon" src="./src/timer.svg" alt="time" />
         <span id="time">99</span>
+        <span id="label">Perdiste! Presiona ENTER para volverlo a intentar</span>
+        </span>
       </div>
       <canvas id="canvas"></canvas>
     </div>
