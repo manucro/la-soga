@@ -9,15 +9,17 @@ const levelSelector = document.getElementById('level-selector');
 const levelSelectorBox = document.getElementById('level-selector-box');
 const gameElement = document.getElementById('game');
 const timeElement = document.getElementById('time');
+const label = document.getElementById('label');
 const backButtonLevelSelector = document.getElementById('level-selector-back-button');
 const backButtonGame = document.getElementById('game-back-button');
 
-const boxSize = 32;
+const boxSize = 48;
 const gameDelay = 200;
 const wallColor = '#000';
 const floorColor = '#666';
 const playerColor = '#E8AD31';
-const playerKillColor = '#f00';
+const winColor = '#0c0';
+const loseColor = '#f00';
 
 const inGameObj = [];
 
@@ -84,7 +86,7 @@ class Player {
       actualLevelArr[this.y][this.x] === 1 ||
       stringPositionsQuery.includes(JSON.stringify(posArray))
     ) {
-      gameLose();
+      gameStop('Perdiste! Presiona enter para volverlo a intentar', loseColor);
       this.c = 'transparent';
     }
   }
@@ -131,7 +133,7 @@ backButtonLevelSelector.addEventListener('click', () => {
 backButtonGame.addEventListener('click', () => {
   gameElement.style.display = 'none';
   levelSelector.style.display = 'flex';
-  clearInterval(gameMainLoop);
+  gameClose();
 });
 
 
@@ -157,8 +159,6 @@ function setLevel(level) {
   actualLevelObj = level;
   actualLevelArr = actualLevelObj.array;
   levelDimensions = [actualLevelArr[0].length, actualLevelArr.length];
-  timer = actualLevelObj.time;
-  timeElement.innerText = timer;
 }
 
 
@@ -168,7 +168,6 @@ function drawSquare(x, y, w, h, c) {
   ctx.fillStyle = c;
   ctx.fillRect(x, y, w, h);
 }
-
 function updateCanvasDimensions(dim) {
   canvas.style.width = dim[0];
   canvas.style.height = dim[1];
@@ -184,6 +183,7 @@ function mainLoop() {
   if (!gameClock) gameClock = setInterval(() => {
     timer--;
     timeElement.innerText = timer;
+    if (timer <= 0) gameStop('Ganaste! Presiona ENTER para volverlo a intentar', winColor);
   }, 1000); 
   playerObj.move(
     (playerDirection === DIRECTIONS.RIGHT) ? 1 : (playerDirection === DIRECTIONS.LEFT) ? -1 : 0,
@@ -197,17 +197,53 @@ function gameInit() {
   drawMap(actualLevelArr);
   const playerInitPosition = actualLevelObj.initPosition;
   playerObj = new Player(playerInitPosition[0], playerInitPosition[1], boxSize, boxSize);
+  timer = actualLevelObj.time;
+  timeElement.innerText = timer;
 
   gameMainLoop = setInterval(mainLoop, gameDelay);
 }
-function gameLose() {
-  clearTimeout(gameMainLoop);
-  clearTimeout(gameClock);
+function gameStop(phrase, color) {
+  clearInterval(gameMainLoop);
+  clearInterval(gameClock);
+  gameMainLoop = null;
+  gameClock = null;
+  playerDirection = null;
+  removeKeyInput();
   positionsQuery.forEach(pos => {
-    drawSquare(pos[0] * boxSize, pos[1] * boxSize, boxSize, boxSize, playerKillColor);
+    drawSquare(pos[0] * boxSize, pos[1] * boxSize, boxSize, boxSize, color);
   });
+  positionsQuery = [];
+  stringPositionsQuery = [];
+  label.innerText = phrase;
+  label.style.color = color;
+  window.addEventListener('keydown', checkEnterRestart);
 }
-
+function gameRestart() {
+  label.innerText = '';
+  label.style.color = 'white';
+  removeEnterRestart();
+  gameInit();
+}
+function checkEnterRestart(ev) {
+  if (ev.key !== 'Enter') return;
+  gameRestart();
+}
+function removeEnterRestart() {
+  window.removeEventListener('keydown', checkEnterRestart);
+}
+function gameClose() {
+  clearInterval(gameMainLoop);
+  clearInterval(gameClock);
+  removeKeyInput();
+  removeEnterRestart();
+  gameMainLoop = null;
+  gameClock = null;
+  playerDirection = null;
+  positionsQuery = [];
+  stringPositionsQuery = [];
+  label.innerText = '';
+  label.style.color = 'white';
+}
 
 
 // Lectura de las teclas presionadas
