@@ -5,6 +5,7 @@
 // Constantes
 const playButton = document.getElementById('play-button');
 const mainTitle = document.getElementById('main-title');
+const dialogScreen = document.getElementById('dialog');
 const levelSelector = document.getElementById('level-selector');
 const levelSelectorBox = document.getElementById('level-selector-box');
 const gameElement = document.getElementById('game');
@@ -30,6 +31,10 @@ const DIRECTIONS = {
   UP: 'up',
   DOWN: 'down'
 }
+const SCREENS = {
+  MAIN_TITLE: mainTitle,
+  DIALOG: dialogScreen
+}
 
 
 
@@ -40,6 +45,7 @@ let levelDimensions = [10, 10];
 let timer = 0;
 let positionsQuery = [];
 let stringPositionsQuery = [];
+let currentScreen = SCREENS.MAIN_TITLE;
 
 
 
@@ -95,10 +101,14 @@ class Player {
 
 
 // Eventos de menús
-playButton.addEventListener('click', () => {
-  mainTitle.style.display = 'none';
-  levelSelector.style.display = 'flex';
-});
+const playButtonAction = () => {
+  initMainDialog(STORY.introduction);
+}
+const backLevelSelectorButtonAction = () => fadeScreen(levelSelector, mainTitle);
+const backGameButtonAction = () => {
+  fadeScreen(gameElement, levelSelector);
+  gameClose();
+}
 
 function updateLevelSelectorLevels() {
   const levelElements = document.createDocumentFragment();
@@ -119,22 +129,38 @@ function updateLevelSelectorLevels() {
   levelSelectorBox.appendChild(levelElements);
 }
 updateLevelSelectorLevels();
-
 function selectLevel(level) {
-  levelSelector.style.display = 'none';
-  gameElement.style.display = 'flex';
+  fadeScreen(levelSelector, gameElement);
   setLevel(level);
   gameInit();
 }
-backButtonLevelSelector.addEventListener('click', () => {
-  levelSelector.style.display = 'none';
-  mainTitle.style.display = 'flex';
-});
-backButtonGame.addEventListener('click', () => {
-  gameElement.style.display = 'none';
-  levelSelector.style.display = 'flex';
-  gameClose();
-});
+
+function addMenusButtonActions() {
+  playButton.addEventListener('click', playButtonAction);
+  backButtonLevelSelector.addEventListener('click', backLevelSelectorButtonAction);
+  backButtonGame.addEventListener('click', backGameButtonAction);
+}
+addMenusButtonActions();
+function removeMenusButtonActions() {
+  playButton.removeEventListener('click', playButtonAction);
+  backButtonLevelSelector.removeEventListener('click', backLevelSelectorButtonAction);
+  backButtonGame.removeEventListener('click', backGameButtonAction);
+  // todo remove level ev listeners
+}
+
+
+// Efectos
+function fadeScreen(prevScreen, newScreen, time = 0.5) {
+  removeMenusButtonActions();
+  prevScreen.style.animation = `${time}s ease forwards fadeOut`;
+  setTimeout(() => {
+    prevScreen.style.display = 'none';
+    prevScreen.style.animation = '';
+    newScreen.style.animation = `${time}s ease fadeIn`;
+    newScreen.style.display = 'flex';
+    addMenusButtonActions();
+  }, 1000 * time);
+}
 
 
 // Funciones del juego

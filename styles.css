@@ -11,6 +11,7 @@
   --button-color: #2a2a2a;
   --button-highlight: #3a3a3a;
   --tooltip-color: #080808;
+  --dialog-bubble-height: 16rem;
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
@@ -57,6 +58,37 @@ button:active { border: none; }
   padding: var(--spacing-md);
   font-size: var(--font-size-mid);
   cursor: pointer;
+}
+
+#dialog {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--modal-color);
+}
+#dialog-box {
+  display: flex;
+  flex-direction: column;
+  height: var(--dialog-bubble-height);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-big);
+  transition: 1s opacity;
+}
+.dialog-box-text, .dialogue-box-label {
+  flex: 5;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.dialog-box-label {
+  flex: 1;
+  opacity: 0.5;
+  text-align: center;
+  font-size: var(--font-size-sml);
 }
 
 #game {
@@ -137,4 +169,13 @@ button:active { border: none; }
   color: var(--text);
   cursor: pointer;
   user-select: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; } 
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
