@@ -3,12 +3,17 @@
 // ---- Sistema de diálogos e historia de La Soga ----
 
 // Textos
-const STORY = {
-  'introduction': [
-    'Esto es un texto de prueba para ver que tal funciona el sistema de textos',
-    'El perro del ex esposo de mi tía necesita un galón de leche descremada.',
-    'La hermeneutica telúrica icaica transtrueca la peripatrética notrética de la filosofía aristotélica, de los diálogos socráticos no dogmáticos.'
-  ]
+let STORY;
+function setStory() {
+  // Actualiza los diálogos para que aparezca el nombre del jugador
+  STORY = {
+    'introduction': [
+      `A ${playerName} le gustaban los juegos peligrosos...`,
+      'Subir por la escalera de mano del tanque, tirarse por el tragaluz del techo, encender papeles en la chimenea, entre otros pasatiempos...',
+      'Estos juegos lo entretuvieron, hasta que descubrió algo en el patio de su casa.',
+      'Algo que cambiaría su vida para siempre.'
+    ]
+  }
 }
 const PRESS_ENTER = 'Presiona ENTER para continuar.';
 
@@ -26,8 +31,8 @@ let generationInterval;
 let textSpeed = 50;
 
 // Funciones
-function initMainDialog(dialog) {
-  fadeScreen(mainTitle, dialogScreen, 1);
+function initMainDialog(dialog, currentScreen) {
+  fadeScreen(currentScreen, dialogScreen, 1);
   currentDialog = dialog;
   setTimeout(() => {
     startInterval();

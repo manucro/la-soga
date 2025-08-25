@@ -5,6 +5,8 @@
 // Constantes
 const playButton = document.getElementById('play-button');
 const mainTitle = document.getElementById('main-title');
+const nameSelection = document.getElementById('name-selection');
+const nextButtonNameSelection = document.querySelector('.name-selection-button');
 const dialogScreen = document.getElementById('dialog');
 const levelSelector = document.getElementById('level-selector');
 const levelSelectorBox = document.getElementById('level-selector-box');
@@ -14,32 +16,37 @@ const label = document.getElementById('label');
 const backButtonLevelSelector = document.getElementById('level-selector-back-button');
 const backButtonGame = document.getElementById('game-back-button');
 
-const boxSize = 48;
+const boxSize = 32;
 const gameDelay = 200;
+const playerAnimationTime = 200;
 const wallColor = '#000';
 const floorColor = '#666';
 const playerColor = '#E8AD31';
 const winColor = '#0c0';
 const loseColor = '#f00';
 
+const keys = {};
 const inGameObj = [];
+
+const playerSprites = document.getElementById('player-sprites');
 
 // Enums
 const DIRECTIONS = {
-  LEFT: 'left',
-  RIGHT: 'right',
-  UP: 'up',
-  DOWN: 'down'
+  DOWN: 0,
+  LEFT: 1,
+  UP: 2,
+  RIGHT: 3
 }
 const SCREENS = {
   MAIN_TITLE: mainTitle,
   DIALOG: dialogScreen
 }
 
-
-
 // Variables
-let gameMainLoop, gameClock, playerObj, playerDirection;
+let playerName = '';
+let playerSpeed = 5;
+let playerDirection = DIRECTIONS.DOWN;
+let playerObj;
 let actualLevelObj, actualLevelArr;
 let levelDimensions = [10, 10];
 let timer = 0;
@@ -52,49 +59,85 @@ let currentScreen = SCREENS.MAIN_TITLE;
 // Canvas
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
 updateCanvasDimensions([320, 320]);
 
 
 
 // Objetos del juego
-class Player {
+class GameObject {
   constructor(x, y, w, h) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
-    this.c = playerColor;
-    this.draw();
+  }
+}
+
+class Player extends GameObject {
+  constructor(x, y, w, h) {
+    super(x, y, w, h);
+    this.innerClock = 1;
+    setInterval(() => this.changeAnimationFrame(), playerAnimationTime);
   }
 
+  update(deltaTime) {
+    // Make this better
+    const bottom = this.y + (this.h / boxSize);
+    const mid = this.y + ((this.h / boxSize) / 2);
+    const right = this.x + (this.w / boxSize);
+    if (keys['ArrowRight']) {
+      if (
+        actualLevelArr[Math.floor(this.y)][Math.floor(this.x) + 1] !== 1 &&
+        actualLevelArr[Math.floor(mid)][Math.floor(this.x) + 1] !== 1 &&
+        actualLevelArr[Math.floor(bottom)][Math.floor(this.x) + 1] !== 1
+      ) {
+        this.x += playerSpeed * deltaTime;
+        playerDirection = DIRECTIONS.RIGHT;
+      }
+    }
+    if (keys['ArrowLeft']) {
+      if (
+        actualLevelArr[Math.floor(this.y)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1 &&
+        actualLevelArr[Math.floor(mid)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1 &&
+        actualLevelArr[Math.floor(bottom)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1
+      ) {
+        this.x -= playerSpeed * deltaTime;
+        playerDirection = DIRECTIONS.LEFT;
+      }
+    }
+    if (keys['ArrowUp']) {
+      if (
+        actualLevelArr[Math.floor(this.y - playerSpeed * deltaTime)][Math.floor(this.x)] !== 1 &&
+        actualLevelArr[Math.floor(this.y - playerSpeed * deltaTime)][Math.floor(right)] !== 1
+      ) {
+        this.y -= playerSpeed * deltaTime;
+        playerDirection = DIRECTIONS.UP;
+      }
+    }
+    if (keys['ArrowDown']) {
+      if (
+        actualLevelArr[Math.floor(bottom + playerSpeed * deltaTime)][Math.floor(this.x)] !== 1 &&
+        actualLevelArr[Math.floor(bottom + playerSpeed * deltaTime)][Math.floor(right)] !== 1
+      ) {
+        this.y += playerSpeed * deltaTime;
+        playerDirection = DIRECTIONS.DOWN;
+      }
+    }
+  }
   draw() {
-    drawSquare(
-      boxSize * this.x,
-      boxSize * this.y,
+    const moving = (keys['ArrowRight'] || keys['ArrowLeft'] || keys['ArrowUp'] || keys['ArrowDown']);
+    drawSprite(
+      playerSprites,
+      this.x * boxSize,
+      this.y * boxSize,
       this.w, this.h,
-      this.c
+      (moving) ? (16 * this.innerClock) : 0, playerDirection * 24,
+      16, 24
     );
   }
-  move(movX, movY) {
-    this.savePosition();
-    this.x += movX;
-    this.y += movY;
-    this.checkWall();
-  }
-  savePosition() {
-    const posArray = [this.x, this.y];
-    positionsQuery.push(posArray);
-    stringPositionsQuery.push(JSON.stringify(posArray));
-  }
-  checkWall() {
-    const posArray = [this.x, this.y];
-    if (
-      actualLevelArr[this.y][this.x] === 1 ||
-      stringPositionsQuery.includes(JSON.stringify(posArray))
-    ) {
-      gameStop('Perdiste! Presiona enter para volverlo a intentar', loseColor);
-      this.c = 'transparent';
-    }
+  changeAnimationFrame() {
+    this.innerClock = (this.innerClock === 1) ? 2 : 1;
   }
 }
 
@@ -102,7 +145,13 @@ class Player {
 
 // Eventos de menús
 const playButtonAction = () => {
-  initMainDialog(STORY.introduction);
+  fadeScreen(mainTitle, levelSelector);
+}
+const nextButtonNSAction = () => {
+  const nameInput = document.querySelector('.name-selection-input');
+  playerName = nameInput.value;
+  setStory();
+  initMainDialog(STORY.introduction, nameSelection);
 }
 const backLevelSelectorButtonAction = () => fadeScreen(levelSelector, mainTitle);
 const backGameButtonAction = () => {
@@ -137,12 +186,14 @@ function selectLevel(level) {
 
 function addMenusButtonActions() {
   playButton.addEventListener('click', playButtonAction);
+  nextButtonNameSelection.addEventListener('click', nextButtonNSAction);
   backButtonLevelSelector.addEventListener('click', backLevelSelectorButtonAction);
   backButtonGame.addEventListener('click', backGameButtonAction);
 }
 addMenusButtonActions();
 function removeMenusButtonActions() {
   playButton.removeEventListener('click', playButtonAction);
+  nextButtonNameSelection.removeEventListener('click', nextButtonNSAction);
   backButtonLevelSelector.removeEventListener('click', backLevelSelectorButtonAction);
   backButtonGame.removeEventListener('click', backGameButtonAction);
   // todo remove level ev listeners
@@ -194,104 +245,60 @@ function drawSquare(x, y, w, h, c) {
   ctx.fillStyle = c;
   ctx.fillRect(x, y, w, h);
 }
+function drawSprite(spritesheet, x, y, w, h, xs, ys, ws, hs) {
+  ctx.drawImage(spritesheet, xs, ys, ws, hs, x, y, w, h);
+}
 function updateCanvasDimensions(dim) {
   canvas.style.width = dim[0];
   canvas.style.height = dim[1];
   canvas.width = dim[0];
   canvas.height = dim[1];
+  ctx.imageSmoothingEnabled = false;
 }
 
 
 
 // Main loop del juego
-function mainLoop() {
-  if (!playerDirection) return;
-  if (!gameClock) gameClock = setInterval(() => {
-    timer--;
-    timeElement.innerText = timer;
-    if (timer <= 0) gameStop('Ganaste! Presiona ENTER para volverlo a intentar', winColor);
-  }, 1000); 
-  playerObj.move(
-    (playerDirection === DIRECTIONS.RIGHT) ? 1 : (playerDirection === DIRECTIONS.LEFT) ? -1 : 0,
-    (playerDirection === DIRECTIONS.DOWN) ? 1 : (playerDirection === DIRECTIONS.UP) ? -1 : 0
-  )
-  if (gameMainLoop) playerObj.draw();
+let isInGame = false;
+let lastTime = -1;
+function gameLoop(timeStamp) {
+  if (lastTime == -1) lastTime = timeStamp - 1; // Fixes pauses and time problems
+  const deltaTime = (timeStamp - lastTime) / 1000;
+  lastTime = timeStamp;
+  updateAndDraw(deltaTime);
+  if (isInGame) requestAnimationFrame(gameLoop);
+}
+function updateAndDraw(deltaTime) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawMap(actualLevelArr);
+  inGameObj.forEach(obj => {
+    obj.update(deltaTime);
+    obj.draw();
+  });
+  // todo lose
 }
 function gameInit() {
   updateCanvasDimensions([levelDimensions[0] * boxSize, levelDimensions[1] * boxSize]);
   activeKeyInput();
   drawMap(actualLevelArr);
   const playerInitPosition = actualLevelObj.initPosition;
-  playerObj = new Player(playerInitPosition[0], playerInitPosition[1], boxSize, boxSize);
-  timer = actualLevelObj.time;
-  timeElement.innerText = timer;
-
-  gameMainLoop = setInterval(mainLoop, gameDelay);
-}
-function gameStop(phrase, color) {
-  clearInterval(gameMainLoop);
-  clearInterval(gameClock);
-  gameMainLoop = null;
-  gameClock = null;
-  playerDirection = null;
-  removeKeyInput();
-  positionsQuery.forEach(pos => {
-    drawSquare(pos[0] * boxSize, pos[1] * boxSize, boxSize, boxSize, color);
-  });
-  positionsQuery = [];
-  stringPositionsQuery = [];
-  label.innerText = phrase;
-  label.style.color = color;
-  window.addEventListener('keydown', checkEnterRestart);
-}
-function gameRestart() {
-  label.innerText = '';
-  label.style.color = 'white';
-  removeEnterRestart();
-  gameInit();
-}
-function checkEnterRestart(ev) {
-  if (ev.key !== 'Enter') return;
-  gameRestart();
-}
-function removeEnterRestart() {
-  window.removeEventListener('keydown', checkEnterRestart);
-}
-function gameClose() {
-  clearInterval(gameMainLoop);
-  clearInterval(gameClock);
-  removeKeyInput();
-  removeEnterRestart();
-  gameMainLoop = null;
-  gameClock = null;
-  playerDirection = null;
-  positionsQuery = [];
-  stringPositionsQuery = [];
-  label.innerText = '';
-  label.style.color = 'white';
+  playerObj = new Player(playerInitPosition[0], playerInitPosition[1], boxSize, boxSize + boxSize / 2);
+  inGameObj.push(playerObj);
+  isInGame = true;
+  requestAnimationFrame(gameLoop);
 }
 
 
 // Lectura de las teclas presionadas
-const keys = {};
-const setDirection = (ev) => {
-  const possibleArrows = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
-  if (!possibleArrows.includes(ev.key)) return;
-
-  switch (ev.key) {
-    case 'ArrowUp': playerDirection = DIRECTIONS.UP; return;
-    case 'ArrowRight': playerDirection = DIRECTIONS.RIGHT; return;
-    case 'ArrowDown': playerDirection = DIRECTIONS.DOWN; return;
-    case 'ArrowLeft': playerDirection = DIRECTIONS.LEFT; return;
-  }
-};
+const addKey = (ev) => keys[ev.key] = true;
+const removeKey = (ev) => keys[ev.key] = false;
 function activeKeyInput() {
-  // Activa la lectura de las teclas
-  window.addEventListener("keydown", setDirection);
+  window.addEventListener("keydown", addKey);
+  window.addEventListener("keyup", removeKey);
 }
 function removeKeyInput() {
-  // Desactiva la lectura de las teclas
-  window.removeEventListener("keydown", setDirection);
+  window.removeEventListener("keydown", addKey);
+  window.removeEventListener("keyup", removeKey);
   const objectKeys = Object.keys(keys);
   objectKeys.forEach(key => delete keys[key]);
 }

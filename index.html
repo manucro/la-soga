@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>La soga</title>
   <link rel="stylesheet" href="styles.css" />
+  <!-- Fuente -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <!-- Recursos -->
+   <img class="sprite" id="player-sprites" src="./src/player-sheet.png" />
 </head>
 <body>
   <div id="root">
@@ -18,6 +24,14 @@
         <button class="main-title-button" type="button">Opciones</button>
       </div>
     </div>
+    <!-- Pantalla de selección de nombre -->
+    <div id="name-selection">
+      <div class="name-selection-box">
+        <div class="name-selection-title">Escribe tu nombre: </div>
+        <input type="text" class="name-selection-input" value="Antoñito López" placeholder="Nombre" />
+        <button type="button" class="name-selection-button menu-button">Siguiente</button>
+      </div>
+    </div>
     <!-- Pantalla de diálogos -->
     <div id="dialog">
       <div id="dialog-box">
@@ -27,12 +41,12 @@
     </div>
     <!-- Selector de niveles -->
      <div id="level-selector">
-        <button type="button" class="back-button" id="level-selector-back-button"> &lt; </button>
+        <button type="button" class="back-button menu-button" id="level-selector-back-button"> &lt; </button>
         <div id="level-selector-box"></div>
      </div>
     <!-- Canvas del juego -->
     <div id="game">
-      <button type="button" class="back-button" id="game-back-button"> &lt; </button>
+      <button type="button" class="back-button menu-button" id="game-back-button"> &lt; </button>
       <div class="data">
         <div class="timer">
           <img class="timer-icon" src="./src/timer.svg" alt="time" />
