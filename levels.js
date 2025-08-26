@@ -16,7 +16,7 @@ const levels = {
       setTimeout(() => disappearPopup(), 10000);
     },
     'objects': [
-      [Collectable, [20, 14, boxSize, boxSize, () => {
+      [Collectable, [20, 14, 48, 48, () => {
         canvas.style.filter = 'brightness(20%)';
         appearPopup(`Todo un año, de su vida de siete años, ${playerName} había esperado a que le dieran este artilugio.`);
         setTimeout(() => disappearPopup(), 5500);

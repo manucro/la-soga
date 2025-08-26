@@ -30,6 +30,7 @@ const keys = {};
 const inGameObj = [];
 
 const playerSprites = document.getElementById('player-sprites');
+const itemsTileset = document.getElementById('items-tileset');
 
 // Enums
 const DIRECTIONS = {
@@ -174,9 +175,11 @@ class Collectable extends GameObject {
     }
   }
   draw() {
-    drawSquare(
+    drawSprite(
+      itemsTileset,
       this.x * boxSize, this.y * boxSize,
-      this.w, this.h, 'red'
+      this.w, this.h,
+      0, 0, 24, 24
     );
   }
 }
