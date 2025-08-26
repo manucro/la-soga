@@ -15,6 +15,7 @@ const timeElement = document.getElementById('time');
 const label = document.getElementById('label');
 const backButtonLevelSelector = document.getElementById('level-selector-back-button');
 const backButtonGame = document.getElementById('game-back-button');
+const infoPopUp = document.getElementById('info-pop-up');
 
 const boxSize = 32;
 const gameDelay = 200;
@@ -44,15 +45,19 @@ const SCREENS = {
 
 // Variables
 let playerName = '';
-let playerSpeed = 5;
+let playerSpeed = 2.5;
 let playerDirection = DIRECTIONS.DOWN;
 let playerObj;
 let actualLevelObj, actualLevelArr;
 let levelDimensions = [10, 10];
+let levelScreen = 0;
+let levelInitAction = () => void 0;
 let timer = 0;
 let positionsQuery = [];
 let stringPositionsQuery = [];
 let currentScreen = SCREENS.MAIN_TITLE;
+
+let hasSeenIntroduction = false;
 
 
 
@@ -72,25 +77,35 @@ class GameObject {
     this.w = w;
     this.h = h;
   }
+
+  destroyObj() {
+    const index = inGameObj.indexOf(this);
+    inGameObj.splice(index, 1);
+  }
 }
 
 class Player extends GameObject {
   constructor(x, y, w, h) {
     super(x, y, w, h);
     this.innerClock = 1;
+    this.bottom = this.y + (this.h / boxSize);
+    this.mid = this.y + ((this.h / boxSize) / 2);
+    this.right = this.x + (this.w / boxSize);
     setInterval(() => this.changeAnimationFrame(), playerAnimationTime);
   }
 
   update(deltaTime) {
     // Make this better
-    const bottom = this.y + (this.h / boxSize);
-    const mid = this.y + ((this.h / boxSize) / 2);
-    const right = this.x + (this.w / boxSize);
+    playerSpeed = (keys['x']) ? 5 : 3;
+
+    this.bottom = this.y + (this.h / boxSize);
+    this.mid = this.y + ((this.h / boxSize) / 2);
+    this.right = this.x + (this.w / boxSize);
     if (keys['ArrowRight']) {
       if (
         actualLevelArr[Math.floor(this.y)][Math.floor(this.x) + 1] !== 1 &&
-        actualLevelArr[Math.floor(mid)][Math.floor(this.x) + 1] !== 1 &&
-        actualLevelArr[Math.floor(bottom)][Math.floor(this.x) + 1] !== 1
+        actualLevelArr[Math.floor(this.mid)][Math.floor(this.x) + 1] !== 1 &&
+        actualLevelArr[Math.floor(this.bottom)][Math.floor(this.x) + 1] !== 1
       ) {
         this.x += playerSpeed * deltaTime;
         playerDirection = DIRECTIONS.RIGHT;
@@ -99,8 +114,8 @@ class Player extends GameObject {
     if (keys['ArrowLeft']) {
       if (
         actualLevelArr[Math.floor(this.y)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1 &&
-        actualLevelArr[Math.floor(mid)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1 &&
-        actualLevelArr[Math.floor(bottom)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1
+        actualLevelArr[Math.floor(this.mid)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1 &&
+        actualLevelArr[Math.floor(this.bottom)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1
       ) {
         this.x -= playerSpeed * deltaTime;
         playerDirection = DIRECTIONS.LEFT;
@@ -109,7 +124,7 @@ class Player extends GameObject {
     if (keys['ArrowUp']) {
       if (
         actualLevelArr[Math.floor(this.y - playerSpeed * deltaTime)][Math.floor(this.x)] !== 1 &&
-        actualLevelArr[Math.floor(this.y - playerSpeed * deltaTime)][Math.floor(right)] !== 1
+        actualLevelArr[Math.floor(this.y - playerSpeed * deltaTime)][Math.floor(this.right)] !== 1
       ) {
         this.y -= playerSpeed * deltaTime;
         playerDirection = DIRECTIONS.UP;
@@ -117,8 +132,8 @@ class Player extends GameObject {
     }
     if (keys['ArrowDown']) {
       if (
-        actualLevelArr[Math.floor(bottom + playerSpeed * deltaTime)][Math.floor(this.x)] !== 1 &&
-        actualLevelArr[Math.floor(bottom + playerSpeed * deltaTime)][Math.floor(right)] !== 1
+        actualLevelArr[Math.floor(this.bottom + playerSpeed * deltaTime)][Math.floor(this.x)] !== 1 &&
+        actualLevelArr[Math.floor(this.bottom + playerSpeed * deltaTime)][Math.floor(this.right)] !== 1
       ) {
         this.y += playerSpeed * deltaTime;
         playerDirection = DIRECTIONS.DOWN;
@@ -141,15 +156,47 @@ class Player extends GameObject {
   }
 }
 
+class Collectable extends GameObject {
+  constructor(x, y, w, h, action) {
+    super(x, y, w, h);
+    this.right = this.x + (this.w / boxSize);
+    this.bottom = this.y + (this.h / boxSize);
+    this.action = action;
+  }
+
+  update() {
+    if (
+      playerObj.x <= this.right && playerObj.right >= this.x &&
+      playerObj.y <= this.bottom && playerObj.bottom >= this.y
+    ) {
+      this.action();
+      this.destroyObj();
+    }
+  }
+  draw() {
+    drawSquare(
+      this.x * boxSize, this.y * boxSize,
+      this.w, this.h, 'red'
+    );
+  }
+}
+
 
 
 // Eventos de menús
 const playButtonAction = () => {
-  fadeScreen(mainTitle, levelSelector);
+  if (hasSeenIntroduction) {
+    updateLevelSelectorLevels();
+    fadeScreen(mainTitle, levelSelector);
+  } else {
+    fadeScreen(mainTitle, nameSelection);
+  }
 }
 const nextButtonNSAction = () => {
   const nameInput = document.querySelector('.name-selection-input');
   playerName = nameInput.value;
+  hasSeenIntroduction = true;
+  updateLevelSelectorLevels();
   setStory();
   initMainDialog(STORY.introduction, nameSelection);
 }
@@ -177,7 +224,6 @@ function updateLevelSelectorLevels() {
   });
   levelSelectorBox.appendChild(levelElements);
 }
-updateLevelSelectorLevels();
 function selectLevel(level) {
   fadeScreen(levelSelector, gameElement);
   setLevel(level);
@@ -188,14 +234,14 @@ function addMenusButtonActions() {
   playButton.addEventListener('click', playButtonAction);
   nextButtonNameSelection.addEventListener('click', nextButtonNSAction);
   backButtonLevelSelector.addEventListener('click', backLevelSelectorButtonAction);
-  backButtonGame.addEventListener('click', backGameButtonAction);
+  // backButtonGame.addEventListener('click', backGameButtonAction);
 }
 addMenusButtonActions();
 function removeMenusButtonActions() {
   playButton.removeEventListener('click', playButtonAction);
   nextButtonNameSelection.removeEventListener('click', nextButtonNSAction);
   backButtonLevelSelector.removeEventListener('click', backLevelSelectorButtonAction);
-  backButtonGame.removeEventListener('click', backGameButtonAction);
+  // backButtonGame.removeEventListener('click', backGameButtonAction);
   // todo remove level ev listeners
 }
 
@@ -211,31 +257,6 @@ function fadeScreen(prevScreen, newScreen, time = 0.5) {
     newScreen.style.display = 'flex';
     addMenusButtonActions();
   }, 1000 * time);
-}
-
-
-// Funciones del juego
-function drawMap(level) {
-  // Dibuja el mapa dado un array de nivel
-  for (let i = 0; i < level.length; i++) {
-    const row = level[i];
-    for (let j = 0; j < row.length; j++) {
-      const bit = level[i][j];
-      drawSquare(
-        boxSize * j,
-        boxSize * i,
-        boxSize, boxSize,
-        (bit === 0) ? floorColor : wallColor
-      );
-    }
-  }
-}
-
-function setLevel(level) {
-  // Establece las distintas variables para comenzar un nivel
-  actualLevelObj = level;
-  actualLevelArr = actualLevelObj.array;
-  levelDimensions = [actualLevelArr[0].length, actualLevelArr.length];
 }
 
 
@@ -256,7 +277,53 @@ function updateCanvasDimensions(dim) {
   ctx.imageSmoothingEnabled = false;
 }
 
-
+// Funciones del juego
+function drawMap(level) {
+  // Dibuja el mapa dado un array de nivel
+  for (let i = 0; i < level.length; i++) {
+    const row = level[i];
+    for (let j = 0; j < row.length; j++) {
+      const bit = level[i][j];
+      drawSquare(
+        boxSize * j,
+        boxSize * i,
+        boxSize, boxSize,
+        (bit === 0) ? floorColor : wallColor
+      );
+    }
+  }
+}
+function setLevel(level) {
+  // Establece las distintas variables para comenzar un nivel
+  actualLevelObj = level;
+  actualLevelArr = actualLevelObj.screens[levelScreen];
+  levelDimensions = [actualLevelArr[0].length, actualLevelArr.length];
+  levelInitAction = actualLevelObj.initAction;
+}
+function changeLevelScreen(newScreen) {
+  levelScreen = newScreen;
+  setLevel(actualLevelObj);
+}
+function createLevelObjects() {
+  const objects = actualLevelObj.objects;
+  objects.forEach(obj => {
+    const newObj = new obj[0](...obj[1]);
+    inGameObj.push(newObj);
+  });
+}
+function appearPopup(text) {
+  infoPopUp.innerText = text;
+  infoPopUp.style.display = 'flex';
+  infoPopUp.style.animation = '1s ease forwards appearPopup';
+  setTimeout(() => infoPopUp.style.animation = '', 1000);
+}
+function disappearPopup() {
+  infoPopUp.style.animation = '1s ease forwards disappearPopup';
+  setTimeout(() => {
+    infoPopUp.style.display = 'none';
+    infoPopUp.style.animation = '';
+  }, 1000)
+}
 
 // Main loop del juego
 let isInGame = false;
@@ -284,6 +351,8 @@ function gameInit() {
   const playerInitPosition = actualLevelObj.initPosition;
   playerObj = new Player(playerInitPosition[0], playerInitPosition[1], boxSize, boxSize + boxSize / 2);
   inGameObj.push(playerObj);
+  createLevelObjects();
+  levelInitAction();
   isInGame = true;
   requestAnimationFrame(gameLoop);
 }

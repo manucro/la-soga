@@ -38,6 +38,13 @@
 button:hover { filter: brightness(125%); }
 button:active { border: none; }
 .sprite { display: none; }
+.back-button {
+  position: absolute;
+  top: var(--spacing-bg);
+  left: var(--spacing-bg);
+  background-color: var(--modal-color);
+  padding: var(--spacing-sm) var(--spacing-bg);
+}
 
 #root {
   display: flex;
@@ -136,26 +143,6 @@ button:active { border: none; }
   font-size: var(--font-size-sml);
 }
 
-#game {
-  display: none;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  background-color: black;
-}
-.timer, #label { font-size: var(--font-size-big); }
-.data {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-#canvas {
-  max-width: 90vw;
-  max-height: 90vh;
-}
-
 #level-selector {
   display: none;
   justify-content: center;
@@ -201,12 +188,39 @@ button:active { border: none; }
   display: flex;
 }
 
-.back-button {
+#game {
+  display: none;
+  position: relative;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+}
+#info-pop-up {
   position: absolute;
-  top: var(--spacing-bg);
-  left: var(--spacing-bg);
+  top: var(--spacing-xb);
+  width: calc(100vw - var(--spacing-xb) * 4);
+  padding: var(--spacing-bg);
+  font-size: var(--font-size-big);
   background-color: var(--modal-color);
-  padding: var(--spacing-sm) var(--spacing-bg);
+  border-radius: var(--spacing-sm);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.timer, #label { font-size: var(--font-size-big); }
+.data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#canvas {
+  max-width: 90vw;
+  max-height: 90vh;
+  transition: 1s filter;
 }
 
 @keyframes fadeIn {
@@ -216,4 +230,12 @@ button:active { border: none; }
 @keyframes fadeOut {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+@keyframes appearPopup {
+  from { transform: translateY(-200%) }
+  to { transform: translateY(0); }
+}
+@keyframes disappearPopup {
+  from { transform: translateY(0) }
+  to { transform: translateY(-200%); }
 }
