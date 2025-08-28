@@ -11,8 +11,11 @@ const dialogScreen = document.getElementById('dialog');
 const levelSelector = document.getElementById('level-selector');
 const levelSelectorBox = document.getElementById('level-selector-box');
 const gameElement = document.getElementById('game');
+const dataElement = document.querySelector('.data');
 const timeElement = document.getElementById('time');
-const label = document.getElementById('label');
+const healthBar = document.querySelector('.health-bar');
+const healthBarFill = document.querySelector('.health-bar-fill');
+const effectsMask = document.getElementById('effects-mask');
 const backButtonLevelSelector = document.getElementById('level-selector-back-button');
 const backButtonGame = document.getElementById('game-back-button');
 const infoPopUp = document.getElementById('info-pop-up');
@@ -20,11 +23,14 @@ const infoPopUp = document.getElementById('info-pop-up');
 const boxSize = 32;
 const gameDelay = 200;
 const playerAnimationTime = 200;
+const bulletSpeedBase = 5;
+const bulletSpeedVariation = 6;
+const maxHealth = 100;
 const wallColor = '#000';
 const floorColor = '#666';
 const playerColor = '#E8AD31';
 const winColor = '#0c0';
-const loseColor = '#f00';
+const loseColor = '#a00';
 
 const keys = {};
 const inGameObj = [];
@@ -49,11 +55,14 @@ let playerName = '';
 let playerSpeed = 2.5;
 let playerDirection = DIRECTIONS.DOWN;
 let playerObj;
+let health = 100;
 let actualLevelObj, actualLevelArr;
+let timeInterval;
 let levelDimensions = [10, 10];
 let levelScreen = 0;
 let levelInitAction = () => void 0;
 let timer = 0;
+let dialogQuery = 0;
 let positionsQuery = [];
 let stringPositionsQuery = [];
 let currentScreen = SCREENS.MAIN_TITLE;
@@ -96,7 +105,7 @@ class Player extends GameObject {
   }
 
   update(deltaTime) {
-    // Make this better
+    // todo Make this better
     playerSpeed = (keys['x']) ? 5 : 3;
 
     this.bottom = this.y + (this.h / boxSize);
@@ -179,8 +188,45 @@ class Collectable extends GameObject {
       itemsTileset,
       this.x * boxSize, this.y * boxSize,
       this.w, this.h,
-      0, 0, 24, 24
+      0, 0, 26, 26
     );
+  }
+}
+
+class Bullet extends GameObject {
+  constructor(x, y, w, h, direction, speed) {
+    super(x, y, w, h);
+    this.direction = direction;
+    this.speed = speed;
+    this.angle = 0;
+    this.factorX = Math.cos(this.direction);
+    this.factorY = Math.sin(this.direction);
+  }
+
+  update(deltaTime) {
+    this.x += this.speed * this.factorX * deltaTime;
+    this.y += this.speed * this.factorY * deltaTime;
+    if (this.y * boxSize > canvas.height || this.y * boxSize < 0) deleteGameInstance(this);
+    this.angle += this.speed * deltaTime;
+    if (
+      playerObj.x <= this.x + this.w / boxSize / 2 && playerObj.right >= this.x + this.w / boxSize / 2 &&
+      playerObj.y <= this.y + this.h / boxSize / 2 && playerObj.bottom >= this.y + this.w / boxSize / 2
+    ) {
+      setHealth(health - 20);
+      deleteGameInstance(this);
+    }
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x * boxSize + this.w / 2, this.y * boxSize + this.h / 2);
+    ctx.rotate(this.angle);
+    drawSprite(
+      itemsTileset,
+      -this.w / 2, -this.h / 2,
+      this.w, this.h,
+      26, 0, 26, 26
+    );
+    ctx.restore();
   }
 }
 
@@ -314,15 +360,21 @@ function createLevelObjects() {
     inGameObj.push(newObj);
   });
 }
-function appearPopup(text) {
+function appearPopup(text, query) {
+  if (dialogQuery !== query) return;
   infoPopUp.innerText = text;
   infoPopUp.style.display = 'flex';
   infoPopUp.style.animation = '1s ease forwards appearPopup';
-  setTimeout(() => infoPopUp.style.animation = '', 1000);
+  setTimeout(() => {
+    if (dialogQuery !== query) return;
+    infoPopUp.style.animation = '';
+  }, 1000);
 }
-function disappearPopup() {
+function disappearPopup(query) {
+  if (dialogQuery !== query) return;
   infoPopUp.style.animation = '1s ease forwards disappearPopup';
   setTimeout(() => {
+    if (dialogQuery !== query) return;
     infoPopUp.style.display = 'none';
     infoPopUp.style.animation = '';
   }, 1000)
@@ -358,6 +410,36 @@ function gameInit() {
   levelInitAction();
   isInGame = true;
   requestAnimationFrame(gameLoop);
+}
+function addGameInstance(cl, args) {
+  const obj = new cl(...args);
+  inGameObj.push(obj);
+}
+function deleteGameInstance(obj) {
+  const index = inGameObj.indexOf(obj);
+  inGameObj.splice(index, 1);
+}
+function setTime(t) {
+  timer = t;
+  timeElement.innerText = timer;
+  timeInterval = setInterval(timerAction, 1000);
+}
+function timerAction() {
+  timer--;
+  timeElement.innerText = timer;
+  if (timer <= 0) gameWin();
+}
+function gameWin() {
+  clearInterval(timeInterval);
+}
+
+function setHealth(newHealth) {
+  const barRect = document.querySelector('.health-bar').getBoundingClientRect();
+  const percentage = newHealth * 100 / maxHealth;
+  healthBarFill.style.width = `${barRect.width * percentage / 100}px`;
+  effectsMask.style.animation = 'none';
+  setTimeout(() => effectsMask.style.animation = '1s ease pulseFail', 1);
+  health = newHealth;
 }
 
 

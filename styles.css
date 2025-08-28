@@ -22,6 +22,9 @@
   --font-size-mid: 32px;
   --font-size-big: 40px;
   --font-size-xxl: 60px;
+  --bar-background: #333333;
+  --bar-fill: #080;
+  --lose-color: #a007;
 }
 .menu-button {
   font-size: var(--font-size-mid);
@@ -144,9 +147,16 @@ button:active { border: none; }
 }
 
 #level-selector {
+  width: 100%;
+  height: 60%;
   display: none;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-evenly;
   align-items: center;
+}
+.level-selector-title {
+  font-size: var(--font-size-big);
+  text-align: center;
 }
 #level-selector-box {
   display: grid;
@@ -192,11 +202,19 @@ button:active { border: none; }
   display: none;
   position: relative;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
   background-color: black;
+}
+#effects-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: transparent;
 }
 #info-pop-up {
   position: absolute;
@@ -213,9 +231,24 @@ button:active { border: none; }
 }
 .timer, #label { font-size: var(--font-size-big); }
 .data {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  opacity: 0;
+  transition: .5s opacity;
+}
+.health-bar {
+  width: 50%;
+  height: var(--spacing-bg);
+  padding: var(--spacing-xs);
+  background-color: var(--bar-background);
+}
+.health-bar-fill {
+  height: 100%;
+  width: 100%;
+  background-color: var(--bar-fill);
+  transition: .25s width;
 }
 #canvas {
   max-width: 90vw;
@@ -238,4 +271,8 @@ button:active { border: none; }
 @keyframes disappearPopup {
   from { transform: translateY(0) }
   to { transform: translateY(-200%); }
+}
+@keyframes pulseFail {
+  from { background-color: var(--lose-color); }
+  to { background-color: transparent; }
 }

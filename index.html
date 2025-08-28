@@ -42,21 +42,25 @@
     </div>
     <!-- Selector de niveles -->
      <div id="level-selector">
-        <button type="button" class="back-button menu-button" id="level-selector-back-button"> &lt; </button>
-        <div id="level-selector-box"></div>
+      <span class="level-selector-title">Selecciona un nivel</span>
+      <button type="button" class="back-button menu-button" id="level-selector-back-button"> &lt; </button>
+      <div id="level-selector-box"></div>
      </div>
     <!-- Canvas del juego -->
     <div id="game">
       <!-- <button type="button" class="back-button menu-button" id="game-back-button"> &lt; </button> -->
-      <!-- <div class="data">
+      <div class="data">
         <div class="timer">
           <img class="timer-icon" src="./src/timer.svg" alt="time" />
           <span id="time">99</span>
         </div>
-        <span id="label"></span>
-      </div> -->
+        <div class="health-bar">
+          <div class="health-bar-fill"></div>
+        </div>
+      </div>
       <canvas id="canvas"></canvas>
       <div id="info-pop-up">Pop Up</div>
+      <div id="effects-mask"></div>
     </div>
   </div>
   <script src="script.js"></script>
