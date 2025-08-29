@@ -98,56 +98,41 @@ class Player extends GameObject {
   constructor(x, y, w, h) {
     super(x, y, w, h);
     this.innerClock = 1;
-    this.bottom = this.y + (this.h / boxSize);
-    this.mid = this.y + ((this.h / boxSize) / 2);
-    this.right = this.x + (this.w / boxSize);
     setInterval(() => this.changeAnimationFrame(), playerAnimationTime);
   }
 
+  checkCollision(checks) {
+    // Chequea lista de comprobaciones a base de [x + checkX, y + checkY]
+    // Toma valores en el coord system del juego
+    return checks.every(coords => {
+      const [cx, cy] = coords;
+      const tileX = Math.floor(this.x + cx);
+      const tileY = Math.floor(this.y + cy);
+      return actualLevelArr[tileY][tileX] !== 1;
+    });
+  }
   update(deltaTime) {
-    // todo Make this better
-    playerSpeed = (keys['x']) ? 5 : 3;
+    playerSpeed = ((keys['x']) ? 5 : 3) / boxSize;
 
-    this.bottom = this.y + (this.h / boxSize);
-    this.mid = this.y + ((this.h / boxSize) / 2);
-    this.right = this.x + (this.w / boxSize);
-    if (keys['ArrowRight']) {
-      if (
-        actualLevelArr[Math.floor(this.y)][Math.floor(this.x) + 1] !== 1 &&
-        actualLevelArr[Math.floor(this.mid)][Math.floor(this.x) + 1] !== 1 &&
-        actualLevelArr[Math.floor(this.bottom)][Math.floor(this.x) + 1] !== 1
-      ) {
-        this.x += playerSpeed * deltaTime;
-        playerDirection = DIRECTIONS.RIGHT;
-      }
+    const midYDif = (this.h / boxSize) / 2;
+    const bottomDif = this.h / boxSize;
+    const rightDif = this.w / boxSize;
+
+    if (keys['ArrowRight'] && this.checkCollision([[playerSpeed + rightDif, 0], [playerSpeed + rightDif, midYDif], [playerSpeed + rightDif, bottomDif]])) {
+      this.x += playerSpeed * boxSize * deltaTime;
+      playerDirection = DIRECTIONS.RIGHT;
     }
-    if (keys['ArrowLeft']) {
-      if (
-        actualLevelArr[Math.floor(this.y)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1 &&
-        actualLevelArr[Math.floor(this.mid)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1 &&
-        actualLevelArr[Math.floor(this.bottom)][Math.floor(this.x - playerSpeed * deltaTime)] !== 1
-      ) {
-        this.x -= playerSpeed * deltaTime;
-        playerDirection = DIRECTIONS.LEFT;
-      }
+    if (keys['ArrowLeft'] && this.checkCollision([[-playerSpeed, 0], [-playerSpeed, midYDif], [-playerSpeed, bottomDif]])) {
+      this.x -= playerSpeed * boxSize * deltaTime;
+      playerDirection = DIRECTIONS.LEFT;
     }
-    if (keys['ArrowUp']) {
-      if (
-        actualLevelArr[Math.floor(this.y - playerSpeed * deltaTime)][Math.floor(this.x)] !== 1 &&
-        actualLevelArr[Math.floor(this.y - playerSpeed * deltaTime)][Math.floor(this.right)] !== 1
-      ) {
-        this.y -= playerSpeed * deltaTime;
-        playerDirection = DIRECTIONS.UP;
-      }
+    if (keys['ArrowUp'] && this.checkCollision([[0, -playerSpeed], [rightDif, -playerSpeed]])) {
+      this.y -= playerSpeed * boxSize * deltaTime;
+      playerDirection = DIRECTIONS.UP;
     }
-    if (keys['ArrowDown']) {
-      if (
-        actualLevelArr[Math.floor(this.bottom + playerSpeed * deltaTime)][Math.floor(this.x)] !== 1 &&
-        actualLevelArr[Math.floor(this.bottom + playerSpeed * deltaTime)][Math.floor(this.right)] !== 1
-      ) {
-        this.y += playerSpeed * deltaTime;
-        playerDirection = DIRECTIONS.DOWN;
-      }
+    if (keys['ArrowDown'] && this.checkCollision([[0, playerSpeed + bottomDif], [rightDif, playerSpeed + bottomDif]])) {
+      this.y += playerSpeed * boxSize * deltaTime;
+      playerDirection = DIRECTIONS.DOWN;
     }
   }
   draw() {
@@ -239,14 +224,17 @@ const playButtonAction = () => {
     fadeScreen(mainTitle, levelSelector);
   } else {
     fadeScreen(mainTitle, nameSelection);
+    setTimeout(() => window.addEventListener('keydown', enterNextButtonNSAction), 500);
   }
 }
+const enterNextButtonNSAction = (ev) => { if (ev.key === 'Enter') nextButtonNSAction(); }
 const nextButtonNSAction = () => {
   const nameInput = document.querySelector('.name-selection-input');
   playerName = nameInput.value;
   hasSeenIntroduction = true;
   updateLevelSelectorLevels();
   setStory();
+  window.removeEventListener('keydown', enterNextButtonNSAction);
   initMainDialog(STORY.introduction, nameSelection);
 }
 const backLevelSelectorButtonAction = () => fadeScreen(levelSelector, mainTitle);
