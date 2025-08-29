@@ -13,9 +13,9 @@ const levels = {
     'name': 'El encuentro',
     'initPosition': [4, 6],
     'initAction': () => {
-      setTimeout(() => appearPopup('Usa las flechas del teclado para moverte', 0), 500);
+      setTimeout(() => appearPopup('Usa W-A-S-D para moverte', 0), 500);
       setTimeout(() => disappearPopup(0), 4500);
-      setTimeout(() => appearPopup('Manten pulsado X para correr', 0), 6000);
+      setTimeout(() => appearPopup('Manten pulsado M para correr', 0), 6000);
       setTimeout(() => disappearPopup(0), 10000);
     },
     'objects': [

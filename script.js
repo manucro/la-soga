@@ -112,31 +112,31 @@ class Player extends GameObject {
     });
   }
   update(deltaTime) {
-    playerSpeed = ((keys['x']) ? 5 : 3) / boxSize;
+    playerSpeed = ((keys['m']) ? 5 : 3) / boxSize;
 
     const midYDif = (this.h / boxSize) / 2;
     const bottomDif = this.h / boxSize;
     const rightDif = this.w / boxSize;
 
-    if (keys['ArrowRight'] && this.checkCollision([[playerSpeed + rightDif, 0], [playerSpeed + rightDif, midYDif], [playerSpeed + rightDif, bottomDif]])) {
+    if (keys['d'] && this.checkCollision([[playerSpeed + rightDif, 0], [playerSpeed + rightDif, midYDif], [playerSpeed + rightDif, bottomDif]])) {
       this.x += playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.RIGHT;
     }
-    if (keys['ArrowLeft'] && this.checkCollision([[-playerSpeed, 0], [-playerSpeed, midYDif], [-playerSpeed, bottomDif]])) {
+    if (keys['a'] && this.checkCollision([[-playerSpeed, 0], [-playerSpeed, midYDif], [-playerSpeed, bottomDif]])) {
       this.x -= playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.LEFT;
     }
-    if (keys['ArrowUp'] && this.checkCollision([[0, -playerSpeed], [rightDif, -playerSpeed]])) {
+    if (keys['w'] && this.checkCollision([[0, -playerSpeed], [rightDif, -playerSpeed]])) {
       this.y -= playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.UP;
     }
-    if (keys['ArrowDown'] && this.checkCollision([[0, playerSpeed + bottomDif], [rightDif, playerSpeed + bottomDif]])) {
+    if (keys['s'] && this.checkCollision([[0, playerSpeed + bottomDif], [rightDif, playerSpeed + bottomDif]])) {
       this.y += playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.DOWN;
     }
   }
   draw() {
-    const moving = (keys['ArrowRight'] || keys['ArrowLeft'] || keys['ArrowUp'] || keys['ArrowDown']);
+    const moving = (keys['d'] || keys['a'] || keys['w'] || keys['s']);
     drawSprite(
       playerSprites,
       this.x * boxSize,
@@ -160,9 +160,11 @@ class Collectable extends GameObject {
   }
 
   update() {
+    const playerRight = playerObj.x + (playerObj.w / boxSize);
+    const playerBottom = playerObj.y + (playerObj.h / boxSize);
     if (
-      playerObj.x <= this.right && playerObj.right >= this.x &&
-      playerObj.y <= this.bottom && playerObj.bottom >= this.y
+      playerObj.x <= this.right && playerRight >= this.x &&
+      playerObj.y <= this.bottom && playerBottom >= this.y
     ) {
       this.action();
       this.destroyObj();
@@ -189,13 +191,15 @@ class Bullet extends GameObject {
   }
 
   update(deltaTime) {
+    const playerRight = playerObj.x + (playerObj.w / boxSize);
+    const playerBottom = playerObj.y + (playerObj.h / boxSize);
     this.x += this.speed * this.factorX * deltaTime;
     this.y += this.speed * this.factorY * deltaTime;
     if (this.y * boxSize > canvas.height || this.y * boxSize < 0) deleteGameInstance(this);
     this.angle += this.speed * deltaTime;
     if (
-      playerObj.x <= this.x + this.w / boxSize / 2 && playerObj.right >= this.x + this.w / boxSize / 2 &&
-      playerObj.y <= this.y + this.h / boxSize / 2 && playerObj.bottom >= this.y + this.w / boxSize / 2
+      playerObj.x <= this.x + this.w / boxSize / 2 && playerRight >= this.x + this.w / boxSize / 2 &&
+      playerObj.y <= this.y + this.h / boxSize / 2 && playerBottom >= this.y + this.w / boxSize / 2
     ) {
       setHealth(health - 20);
       deleteGameInstance(this);
@@ -420,6 +424,10 @@ function timerAction() {
 function gameWin() {
   clearInterval(timeInterval);
 }
+function gameLose() {
+  clearInterval(timeInterval);
+  isInGame = false;
+}
 
 function setHealth(newHealth) {
   const barRect = document.querySelector('.health-bar').getBoundingClientRect();
@@ -428,6 +436,7 @@ function setHealth(newHealth) {
   effectsMask.style.animation = 'none';
   setTimeout(() => effectsMask.style.animation = '1s ease pulseFail', 1);
   health = newHealth;
+  if (health <= 0) gameLose();
 }
 
 
