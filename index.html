@@ -48,7 +48,6 @@
      </div>
     <!-- Canvas del juego -->
     <div id="game">
-      <!-- <button type="button" class="back-button menu-button" id="game-back-button"> &lt; </button> -->
       <div class="data">
         <div class="timer">
           <img class="timer-icon" src="./src/timer.svg" alt="time" />
@@ -61,6 +60,15 @@
       <canvas id="canvas"></canvas>
       <div id="info-pop-up">Pop Up</div>
       <div id="effects-mask"></div>
+      <div id="game-modal">
+        <div id="game-modal-box">
+          <div class="game-modal-title">Nivel completado</div>
+          <div class="game-modal-buttons-box">
+            <button id="game-modal-play-again-button" type="button" class="game-modal-button menu-button">Volver a jugar</button>
+            <button id="game-modal-back-title-button" type="button" class="game-modal-button menu-button">Siguiente</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <script src="script.js"></script>

@@ -32,14 +32,16 @@ const levels = {
         setTimeout(() => canvas.style.filter = 'brightness(100%)', 18500);
         setTimeout(() => {
           dataElement.style.opacity = '1';
+          dataElement.style.animation = '.5s ease fadeIn';
+          setTimeout(() => dataElement.style.animation = 'none', 1000);
           setTime(30);
         }, 19000);
         setTimeout(() => {
           inGameEnemyInterval = setInterval(generateEnemy, enemyIntervalFrec);
           setTimeout(() => {
-            console.log('Difficulty has changed');
             clearInterval(inGameEnemyInterval);
             enemyIntervalFrec /= 3;
+            if (!isInGame) return;
             inGameEnemyInterval = setInterval(generateEnemy, enemyIntervalFrec);
             setTimeout(() => clearInterval(inGameEnemyInterval), 20000);
           }, 10000)

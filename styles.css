@@ -7,6 +7,7 @@
 :root {
   --background1: #111;
   --background2: #333;
+  --background-game: #000;
   --text: #ccc;
   --modal-color: #0e0e0e;
   --button-color: #2a2a2a;
@@ -58,6 +59,7 @@ button:active { border: none; }
   background: linear-gradient(45deg, var(--background1), var(--background2));
   color: var(--text);
 }
+.root-in-game { background: var(--background-game) !important; }
 
 #main-title {
   height: 100%;
@@ -206,7 +208,7 @@ button:active { border: none; }
   align-items: center;
   width: 100%;
   height: 100%;
-  background-color: black;
+  background-color: var(--background-game);
 }
 #effects-mask {
   position: absolute;
@@ -236,7 +238,6 @@ button:active { border: none; }
   flex-direction: column;
   align-items: center;
   opacity: 0;
-  transition: .5s opacity;
 }
 .health-bar {
   width: 50%;
@@ -254,6 +255,36 @@ button:active { border: none; }
   max-width: 90vw;
   max-height: 90vh;
   transition: 1s filter;
+}
+
+#game-modal {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+#game-modal-box {
+  background-color: var(--modal-color);
+  border-radius: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  width: calc(100vw - var(--spacing-xb) * 8);
+  height: calc(100vh - var(--spacing-xb) * 8);
+}
+.game-modal-title {
+  font-size: var(--font-size-xxl);
+  text-align: center;
+  font-weight: bold;
+}
+.game-modal-buttons-box {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
 }
 
 @keyframes fadeIn {
@@ -275,4 +306,8 @@ button:active { border: none; }
 @keyframes pulseFail {
   from { background-color: var(--lose-color); }
   to { background-color: transparent; }
+}
+@keyframes appearModal {
+  from { transform: scale(0); }
+  to { transform: scale(100%); }
 }

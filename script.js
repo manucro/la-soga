@@ -3,6 +3,7 @@
 // ---- Código La Soga, proyecto Lengua y Literatura ----
 
 // Constantes
+const root = document.getElementById('root');
 const playButton = document.getElementById('play-button');
 const mainTitle = document.getElementById('main-title');
 const nameSelection = document.getElementById('name-selection');
@@ -15,9 +16,12 @@ const dataElement = document.querySelector('.data');
 const timeElement = document.getElementById('time');
 const healthBar = document.querySelector('.health-bar');
 const healthBarFill = document.querySelector('.health-bar-fill');
+const gameModal = document.getElementById('game-modal');
+const gameModalTitle = document.querySelector('.game-modal-title');
+const gameModalPlayAgainButton = document.getElementById('game-modal-play-again-button');
+const gameModalBackTitleButton = document.getElementById('game-modal-back-title-button');
 const effectsMask = document.getElementById('effects-mask');
 const backButtonLevelSelector = document.getElementById('level-selector-back-button');
-const backButtonGame = document.getElementById('game-back-button');
 const infoPopUp = document.getElementById('info-pop-up');
 
 const boxSize = 32;
@@ -33,7 +37,6 @@ const winColor = '#0c0';
 const loseColor = '#a00';
 
 const keys = {};
-const inGameObj = [];
 
 const playerSprites = document.getElementById('player-sprites');
 const itemsTileset = document.getElementById('items-tileset');
@@ -63,8 +66,7 @@ let levelScreen = 0;
 let levelInitAction = () => void 0;
 let timer = 0;
 let dialogQuery = 0;
-let positionsQuery = [];
-let stringPositionsQuery = [];
+let inGameObj = [];
 let currentScreen = SCREENS.MAIN_TITLE;
 
 let hasSeenIntroduction = false;
@@ -242,9 +244,18 @@ const nextButtonNSAction = () => {
   initMainDialog(STORY.introduction, nameSelection);
 }
 const backLevelSelectorButtonAction = () => fadeScreen(levelSelector, mainTitle);
-const backGameButtonAction = () => {
-  fadeScreen(gameElement, levelSelector);
+const playAgainAction = () => {
+  fadeScreen(gameElement, gameElement);
+  setTimeout(() => {
+    gameRestart();
+    gameModal.style.display = 'none';
+  }, 500);
+}
+const backTitleAction = () => {
   gameClose();
+  root.classList.remove('root-in-game');
+  fadeScreen(gameElement, levelSelector);
+  setTimeout(() => gameModal.style.display = 'none', 500);
 }
 
 function updateLevelSelectorLevels() {
@@ -275,14 +286,16 @@ function addMenusButtonActions() {
   playButton.addEventListener('click', playButtonAction);
   nextButtonNameSelection.addEventListener('click', nextButtonNSAction);
   backButtonLevelSelector.addEventListener('click', backLevelSelectorButtonAction);
-  // backButtonGame.addEventListener('click', backGameButtonAction);
+  gameModalPlayAgainButton.addEventListener('click', playAgainAction);
+  gameModalBackTitleButton.addEventListener('click', backTitleAction);
 }
 addMenusButtonActions();
 function removeMenusButtonActions() {
   playButton.removeEventListener('click', playButtonAction);
   nextButtonNameSelection.removeEventListener('click', nextButtonNSAction);
   backButtonLevelSelector.removeEventListener('click', backLevelSelectorButtonAction);
-  // backButtonGame.removeEventListener('click', backGameButtonAction);
+  gameModalPlayAgainButton.removeEventListener('click', playAgainAction);
+  gameModalBackTitleButton.removeEventListener('click', backTitleAction);
   // todo remove level ev listeners
 }
 
@@ -371,6 +384,13 @@ function disappearPopup(query) {
     infoPopUp.style.animation = '';
   }, 1000)
 }
+function appearGameModal(text, secondButtonText = 'Volver atrás') {
+  gameModalTitle.innerText = text;
+  gameModalBackTitleButton.innerText = secondButtonText;
+  canvas.style.filter = 'brightness(20%)';
+  gameModal.style.display = 'flex';
+  gameModal.style.animation = '1s ease appearModal';
+}
 
 // Main loop del juego
 let isInGame = false;
@@ -389,12 +409,10 @@ function updateAndDraw(deltaTime) {
     obj.update(deltaTime);
     obj.draw();
   });
-  // todo lose
 }
 function gameInit() {
   updateCanvasDimensions([levelDimensions[0] * boxSize, levelDimensions[1] * boxSize]);
   activeKeyInput();
-  drawMap(actualLevelArr);
   const playerInitPosition = actualLevelObj.initPosition;
   playerObj = new Player(playerInitPosition[0], playerInitPosition[1], boxSize, boxSize + boxSize / 2);
   inGameObj.push(playerObj);
@@ -402,6 +420,10 @@ function gameInit() {
   levelInitAction();
   isInGame = true;
   requestAnimationFrame(gameLoop);
+  setTimeout(() => {
+    setHealth(maxHealth);
+    root.classList.add('root-in-game');
+  }, 1000);
 }
 function addGameInstance(cl, args) {
   const obj = new cl(...args);
@@ -423,10 +445,26 @@ function timerAction() {
 }
 function gameWin() {
   clearInterval(timeInterval);
+  clearInterval(inGameEnemyInterval);
+  isInGame = false;
+  appearGameModal('Nivel completado', 'Siguiente');
 }
 function gameLose() {
   clearInterval(timeInterval);
+  clearInterval(inGameEnemyInterval);
   isInGame = false;
+  appearGameModal('¡Perdiste!')
+}
+function gameClose() {
+  inGameObj = [];
+  removeKeyInput();
+  dialogQuery = 0;
+  dataElement.style.opacity = '0';
+  canvas.style.filter = 'brightness(100%)';
+}
+function gameRestart() {
+  gameClose();
+  gameInit();
 }
 
 function setHealth(newHealth) {
@@ -434,7 +472,7 @@ function setHealth(newHealth) {
   const percentage = newHealth * 100 / maxHealth;
   healthBarFill.style.width = `${barRect.width * percentage / 100}px`;
   effectsMask.style.animation = 'none';
-  setTimeout(() => effectsMask.style.animation = '1s ease pulseFail', 1);
+  if (newHealth < health) setTimeout(() => effectsMask.style.animation = '1s ease pulseFail', 1);
   health = newHealth;
   if (health <= 0) gameLose();
 }
