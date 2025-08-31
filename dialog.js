@@ -12,6 +12,12 @@ function setStory() {
       'Subir por la escalera de mano del tanque, tirarse por el tragaluz del techo, encender papeles en la chimenea, entre otros pasatiempos...',
       'Estos juegos lo entretuvieron, hasta que descubrió algo en el patio de su casa.',
       'Algo que cambiaría su vida para siempre.'
+    ],
+    'level2Intro': [
+      `${playerName} podía hacer con la soga ahora lo que quisiera...`,
+      `Primeramente hizo una hamaca, un arnés para caballo, una liana, un salvavidas, una horca para los reos, y finalmente una serpiente.`,
+      `Tirándola con fuerza hacia adelante, la soga se retorcía y se volvía con la cabeza hacia atrás, con ímpetu, como dispuesta a morder.`,
+      `Tanto asi que parecía una serpiente real, de la que ${playerName} tenía que escapar...`
     ]
   }
 }
@@ -29,9 +35,11 @@ let currentChain = 0;
 let currentChar = 0;
 let generationInterval;
 let textSpeed = 50;
+let finishDialogAction = () => void 0;
 
 // Funciones
-function initMainDialog(dialog, currentScreen) {
+function initMainDialog(dialog, currentScreen, dialogAction) {
+  finishDialogAction = dialogAction;
   fadeScreen(currentScreen, dialogScreen, 1);
   currentDialog = dialog;
   setTimeout(() => {
@@ -75,5 +83,12 @@ const updateText = () => dialogBoxText.innerText = showingText;
 function finishText() {
   dialogBox.style.opacity = 0;
   window.removeEventListener('keydown', passChain);
-  setTimeout(() => fadeScreen(dialogScreen, levelSelector), 1000);
+  setTimeout(() => {
+    finishDialogAction();
+    dialogBox.style.opacity = 1;
+    currentChar = 0;
+    currentChain = 0;
+    showingText = '';
+    updateText();
+  }, 1000);
 }

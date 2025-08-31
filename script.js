@@ -57,7 +57,7 @@ const SCREENS = {
 let playerName = '';
 let playerSpeed = 2.5;
 let playerDirection = DIRECTIONS.DOWN;
-let playerObj;
+let playerObj, snakeObj;
 let health = 100;
 let actualLevelObj, actualLevelArr;
 let timeInterval;
@@ -68,6 +68,7 @@ let timer = 0;
 let dialogQuery = 0;
 let inGameObj = [];
 let currentScreen = SCREENS.MAIN_TITLE;
+let snakeDelay = 200;
 
 let hasSeenIntroduction = false;
 
@@ -116,6 +117,8 @@ class Player extends GameObject {
   update(deltaTime) {
     playerSpeed = ((keys['m']) ? 5 : 3) / boxSize;
 
+    const prevX = Math.floor(this.x);
+    const prevY = Math.floor(this.y);
     const midYDif = (this.h / boxSize) / 2;
     const bottomDif = this.h / boxSize;
     const rightDif = this.w / boxSize;
@@ -123,18 +126,22 @@ class Player extends GameObject {
     if (keys['d'] && this.checkCollision([[playerSpeed + rightDif, 0], [playerSpeed + rightDif, midYDif], [playerSpeed + rightDif, bottomDif]])) {
       this.x += playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.RIGHT;
+      if (Math.floor(this.x) > prevX && snakeObj) snakeObj.queueAdd(Math.floor(this.x), Math.floor(this.y));
     }
     if (keys['a'] && this.checkCollision([[-playerSpeed, 0], [-playerSpeed, midYDif], [-playerSpeed, bottomDif]])) {
       this.x -= playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.LEFT;
+      if (Math.floor(this.x) < prevX && snakeObj) snakeObj.queueAdd(Math.floor(this.x), Math.floor(this.y));
     }
     if (keys['w'] && this.checkCollision([[0, -playerSpeed], [rightDif, -playerSpeed]])) {
       this.y -= playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.UP;
+      if (Math.floor(this.y) < prevY && snakeObj) snakeObj.queueAdd(Math.floor(this.x), Math.floor(this.y));
     }
     if (keys['s'] && this.checkCollision([[0, playerSpeed + bottomDif], [rightDif, playerSpeed + bottomDif]])) {
       this.y += playerSpeed * boxSize * deltaTime;
       playerDirection = DIRECTIONS.DOWN;
+      if (Math.floor(this.y) > prevY && snakeObj) snakeObj.queueAdd(Math.floor(this.x), Math.floor(this.y));
     }
   }
   draw() {
@@ -221,6 +228,94 @@ class Bullet extends GameObject {
   }
 }
 
+class Snake extends GameObject {
+  constructor(x, y, w, h, initQueue) {
+    super(x, y, w, h);
+    this.queue = initQueue;
+    this.queuePosition = 0;
+    this.charge = 0;
+  }
+  update() {
+    this.charge++;
+    if (this.charge >= snakeDelay) {
+      this.charge = 0;
+      this.queuePosition++;
+      addGameInstance(SnakeTrail, [this.x, this.y, this.w, this.h, this.queuePosition - 1]);
+      this.x = this.queue[this.queuePosition][0];
+      this.y = this.queue[this.queuePosition][1];
+    }
+  }
+  queueAdd(x, y) {
+    this.queue.push([x, y]);
+  }
+  draw() {
+    drawSprite(
+      itemsTileset,
+      this.x * boxSize, this.y * boxSize,
+      this.w, this.h,
+      26, 0, 26, 26
+    );
+  }
+}
+class SnakeTrail extends GameObject {
+  constructor(x, y, w, h, queuePos) {
+    super(x, y, w, h);
+
+    const spritePos = {
+      x: 0,
+      y: 0
+    }
+    const prevPos = (snakeObj.queue[queuePos-1]) ? snakeObj.queue[queuePos-1] : [snakeObj.queue[queuePos][0] - 1, snakeObj.queue[queuePos][1]];
+    const pos = snakeObj.queue[queuePos];
+    const nextPos = snakeObj.queue[queuePos+1];
+    // Chequea horizontales
+    // if (prevPos[1] === pos[1] && pos[1] === nextPos[1]) spritePos.x = 104;
+    // else if (prevPos[1] === pos[1] && pos[0] === nextPos[0]) {
+    //   if (prevPos[0] < pos[0]) {
+    //     if (nextPos[1] > pos[1]) { spritePos.x = 78 }
+    //     else { spritePos.x = 78; spritePos.y = 26 }
+    //   } else {
+    //     if (nextPos[1] > pos[1]) { spritePos.x = 52 }
+    //     else { spritePos.x = 52; spritePos.y = 26 }
+    //   }
+    // }
+    // if (prevPos[0] === pos[0] && pos[0] === nextPos[0]) { spritePos.x = 104; spritePos.y = 26; }
+    // else if (prevPos[0] === pos[0] && pos[1] === nextPos[1]) {
+    //   if (prevPos[1] < pos[1]) {
+    //     if (nextPos[0] > pos[0]) { spritePos.x = 52; spritePos.y = 26 }
+    //     else { spritePos.x = 78; spritePos.y = 26 }
+    //   } else {
+    //     if (nextPos[0] > pos[0]) { spritePos.x = 52 }
+    //     else { spritePos.x = 78 }
+    //   }
+    // }
+    if (prevPos[1] === pos[1] && pos[1] === nextPos[1]) spritePos.x = 104;
+    else if (prevPos[1] === pos[1] && pos[0] === nextPos[0]) {
+      if (prevPos[0] < pos[0]) spritePos.x = 78;
+      else spritePos.x = 52;
+      if (nextPos[1] < pos[1]) spritePos.y = 26;
+    }
+
+    // Chequea verticales
+    if (prevPos[0] === pos[0] && pos[0] === nextPos[0]) { spritePos.x = 104; spritePos.y = 26; }
+    else if (prevPos[0] === pos[0] && pos[1] === nextPos[1]) {
+      if (nextPos[0] > pos[0]) spritePos.x = 52;
+      else spritePos.x = 78;
+      if (prevPos[1] < pos[1]) spritePos.y = 26;
+    }
+
+    this.sprite = spritePos;
+  }
+  update() {}
+  draw() {
+    drawSprite(
+      itemsTileset,
+      this.x * boxSize, this.y * boxSize,
+      this.w, this.h,
+      this.sprite.x, this.sprite.y, 26, 26
+    );
+  }
+}
 
 
 // Eventos de menús
@@ -241,7 +336,7 @@ const nextButtonNSAction = () => {
   updateLevelSelectorLevels();
   setStory();
   window.removeEventListener('keydown', enterNextButtonNSAction);
-  initMainDialog(STORY.introduction, nameSelection);
+  initMainDialog(STORY.introduction, nameSelection, () => fadeScreen(dialogScreen, levelSelector));
 }
 const backLevelSelectorButtonAction = () => fadeScreen(levelSelector, mainTitle);
 const playAgainAction = () => {
@@ -277,9 +372,16 @@ function updateLevelSelectorLevels() {
   levelSelectorBox.appendChild(levelElements);
 }
 function selectLevel(level) {
-  fadeScreen(levelSelector, gameElement);
   setLevel(level);
-  gameInit();
+  if (actualLevelObj.dialog === null) {
+    fadeScreen(levelSelector, gameElement);
+    gameInit();
+  } else {
+    initMainDialog(STORY[actualLevelObj.dialog], levelSelector, () => {
+      fadeScreen(dialogScreen, gameElement);
+      gameInit();
+    });
+  }
 }
 
 function addMenusButtonActions() {
