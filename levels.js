@@ -19,6 +19,7 @@ const levels = {
       setTimeout(() => appearPopup('Manten pulsado M para correr', 0), 6000);
       setTimeout(() => disappearPopup(0), 10000);
     },
+    'finalAction': () => void 0,
     'objects': [
       [Collectable, [21, 14, 48, 48, () => {
         enemyIntervalFrec = 1500;
@@ -87,12 +88,18 @@ const levels = {
     'initAction': () => {
       snakeDelay = 30;
       snakeObj = inGameObj[1];
+      console.log(inGameObj);
+      console.log(snakeObj);
+      healthBar.style.opacity = '0';
       appearPopup('Corre', 0);
       setTimeout(() => {
         disappearPopup(0);
         snakeDelay = 10;
+        dataElement.style.opacity = '1';
+        setTime(20);
       }, 2500);
     },
+    'finalAction': () => healthBar.style.opacity = '1',
     'objects': [
       [Snake, [0, 13, boxSize, boxSize, 
         [[0, 13], [1, 13], [1, 12], [1, 11], [1, 10], [1, 9], [1, 8], [2, 8], [3, 8], [4, 8]]

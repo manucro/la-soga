@@ -64,6 +64,7 @@ let timeInterval;
 let levelDimensions = [10, 10];
 let levelScreen = 0;
 let levelInitAction = () => void 0;
+let levelFinalAction = () => void 0;
 let timer = 0;
 let dialogQuery = 0;
 let inGameObj = [];
@@ -231,7 +232,7 @@ class Bullet extends GameObject {
 class Snake extends GameObject {
   constructor(x, y, w, h, initQueue) {
     super(x, y, w, h);
-    this.queue = initQueue;
+    this.queue = [...initQueue];
     this.queuePosition = 0;
     this.charge = 0;
   }
@@ -241,6 +242,7 @@ class Snake extends GameObject {
       this.charge = 0;
       this.queuePosition++;
       addGameInstance(SnakeTrail, [this.x, this.y, this.w, this.h, this.queuePosition - 1]);
+      if (!this.queue[this.queuePosition]) return;
       this.x = this.queue[this.queuePosition][0];
       this.y = this.queue[this.queuePosition][1];
     }
@@ -257,6 +259,7 @@ class Snake extends GameObject {
     );
   }
 }
+
 class SnakeTrail extends GameObject {
   constructor(x, y, w, h, queuePos) {
     super(x, y, w, h);
@@ -268,6 +271,11 @@ class SnakeTrail extends GameObject {
     const prevPos = (snakeObj.queue[queuePos-1]) ? snakeObj.queue[queuePos-1] : [snakeObj.queue[queuePos][0] - 1, snakeObj.queue[queuePos][1]];
     const pos = snakeObj.queue[queuePos];
     const nextPos = snakeObj.queue[queuePos+1];
+    if (!nextPos) {
+      deleteGameInstance(this);
+      gameLose();
+      return;
+    }
     // Chequea horizontales
     // if (prevPos[1] === pos[1] && pos[1] === nextPos[1]) spritePos.x = 104;
     // else if (prevPos[1] === pos[1] && pos[0] === nextPos[0]) {
@@ -306,8 +314,18 @@ class SnakeTrail extends GameObject {
 
     this.sprite = spritePos;
   }
-  update() {}
+  update() {
+    const playerRight = playerObj.x + (playerObj.w / boxSize);
+    const playerBottom = playerObj.y + (playerObj.h / boxSize);
+    if (
+      playerObj.x <= this.x + this.w / boxSize / 2 && playerRight >= this.x + this.w / boxSize / 2 &&
+      playerObj.y <= this.y + this.h / boxSize / 2 && playerBottom >= this.y + this.w / boxSize / 2
+    ) {
+      gameLose();
+    }
+  }
   draw() {
+    if (!this.sprite) return;
     drawSprite(
       itemsTileset,
       this.x * boxSize, this.y * boxSize,
@@ -455,6 +473,7 @@ function setLevel(level) {
   actualLevelArr = actualLevelObj.screens[levelScreen];
   levelDimensions = [actualLevelArr[0].length, actualLevelArr.length];
   levelInitAction = actualLevelObj.initAction;
+  levelFinalAction = actualLevelObj.finalAction;
 }
 function changeLevelScreen(newScreen) {
   levelScreen = newScreen;
@@ -484,7 +503,7 @@ function disappearPopup(query) {
     if (dialogQuery !== query) return;
     infoPopUp.style.display = 'none';
     infoPopUp.style.animation = '';
-  }, 1000)
+  }, 1000);
 }
 function appearGameModal(text, secondButtonText = 'Volver atrás') {
   gameModalTitle.innerText = text;
@@ -563,6 +582,7 @@ function gameClose() {
   dialogQuery = 0;
   dataElement.style.opacity = '0';
   canvas.style.filter = 'brightness(100%)';
+  levelFinalAction();
 }
 function gameRestart() {
   gameClose();

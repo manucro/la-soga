@@ -18,6 +18,28 @@ function setStory() {
       `Primeramente hizo una hamaca, un arnés para caballo, una liana, un salvavidas, una horca para los reos, y finalmente una serpiente.`,
       `Tirándola con fuerza hacia adelante, la soga se retorcía y se volvía con la cabeza hacia atrás, con ímpetu, como dispuesta a morder.`,
       `Tanto asi que parecía una serpiente real, de la que ${playerName} tenía que escapar...`
+    ],
+    'level3Intro': [
+      `${playerName} siempre tenía cuidado de evitar que la soga lo tocara; era parte del juego.`,
+      `Yo lo vi llamar a la soga, como quien llama a un perro, y la soga se le acercaba.`,
+      `Con tanta maestría ${playerName} lanzaba la soga y le daba aquel movimiento de serpiente maligna y retorcida.`,
+      `Nadie se atrevía a decirle "${playerName}, no juegues con la soga"...`
+    ],
+    'level4Intro': [
+      `La soga parecía tranquila cuando dormía sobre la mesa o en el suelo`,
+      `Nadie la hubiera creído capaz de ahorcar a nadie.`,
+      `Con el tiempo se volvió más flexible y oscura, casi verde y, por último, un poco viscosa y desagradable.`,
+      `${playerName} la bautizó con el nombre de "Prímula".`
+    ],
+    'level5Intro': [
+      `Una tarde de diciembre, el sol, como una bola de fuego, brillaba en el horizonte.`,
+      `Aquella vez la soga volvió hacia atrás con la energía de siempre.`,
+      `Pero esta vez, ${playerName} no retrocedió para esquivarla...`
+    ],
+    'final': [
+      `Así murió ${playerName}. Yo lo ví, tendido, con los ojos abiertos.`,
+      `La soga, con el flequillo despeinado, enroscada junto a él, lo valaba.`,
+      `FIN`
     ]
   }
 }
