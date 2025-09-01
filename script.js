@@ -13,6 +13,7 @@ const levelSelector = document.getElementById('level-selector');
 const levelSelectorBox = document.getElementById('level-selector-box');
 const gameElement = document.getElementById('game');
 const dataElement = document.querySelector('.data');
+const timerElement = document.querySelector('.timer');
 const timeElement = document.getElementById('time');
 const healthBar = document.querySelector('.health-bar');
 const healthBarFill = document.querySelector('.health-bar-fill');
@@ -27,8 +28,6 @@ const infoPopUp = document.getElementById('info-pop-up');
 const boxSize = 32;
 const gameDelay = 200;
 const playerAnimationTime = 200;
-const bulletSpeedBase = 5;
-const bulletSpeedVariation = 6;
 const maxHealth = 100;
 const wallColor = '#000';
 const floorColor = '#666';
@@ -70,8 +69,12 @@ let dialogQuery = 0;
 let inGameObj = [];
 let currentScreen = SCREENS.MAIN_TITLE;
 let snakeDelay = 200;
+let bulletSpeedBase = 5;
+let bulletSpeedVariation = 6;
+let bulletDamage = 20;
 
 let hasSeenIntroduction = false;
+let isSnakeGreen = false;
 
 
 
@@ -211,7 +214,7 @@ class Bullet extends GameObject {
       playerObj.x <= this.x + this.w / boxSize / 2 && playerRight >= this.x + this.w / boxSize / 2 &&
       playerObj.y <= this.y + this.h / boxSize / 2 && playerBottom >= this.y + this.w / boxSize / 2
     ) {
-      setHealth(health - 20);
+      setHealth(health - bulletDamage);
       deleteGameInstance(this);
     }
   }
@@ -223,7 +226,7 @@ class Bullet extends GameObject {
       itemsTileset,
       -this.w / 2, -this.h / 2,
       this.w, this.h,
-      26, 0, 26, 26
+      26, (isSnakeGreen) ? 26 : 0, 26, 26
     );
     ctx.restore();
   }
@@ -255,7 +258,7 @@ class Snake extends GameObject {
       itemsTileset,
       this.x * boxSize, this.y * boxSize,
       this.w, this.h,
-      26, 0, 26, 26
+      26, (isSnakeGreen) ? 26 : 0, 26, 26
     );
   }
 }
@@ -277,26 +280,6 @@ class SnakeTrail extends GameObject {
       return;
     }
     // Chequea horizontales
-    // if (prevPos[1] === pos[1] && pos[1] === nextPos[1]) spritePos.x = 104;
-    // else if (prevPos[1] === pos[1] && pos[0] === nextPos[0]) {
-    //   if (prevPos[0] < pos[0]) {
-    //     if (nextPos[1] > pos[1]) { spritePos.x = 78 }
-    //     else { spritePos.x = 78; spritePos.y = 26 }
-    //   } else {
-    //     if (nextPos[1] > pos[1]) { spritePos.x = 52 }
-    //     else { spritePos.x = 52; spritePos.y = 26 }
-    //   }
-    // }
-    // if (prevPos[0] === pos[0] && pos[0] === nextPos[0]) { spritePos.x = 104; spritePos.y = 26; }
-    // else if (prevPos[0] === pos[0] && pos[1] === nextPos[1]) {
-    //   if (prevPos[1] < pos[1]) {
-    //     if (nextPos[0] > pos[0]) { spritePos.x = 52; spritePos.y = 26 }
-    //     else { spritePos.x = 78; spritePos.y = 26 }
-    //   } else {
-    //     if (nextPos[0] > pos[0]) { spritePos.x = 52 }
-    //     else { spritePos.x = 78 }
-    //   }
-    // }
     if (prevPos[1] === pos[1] && pos[1] === nextPos[1]) spritePos.x = 104;
     else if (prevPos[1] === pos[1] && pos[0] === nextPos[0]) {
       if (prevPos[0] < pos[0]) spritePos.x = 78;
@@ -330,7 +313,7 @@ class SnakeTrail extends GameObject {
       itemsTileset,
       this.x * boxSize, this.y * boxSize,
       this.w, this.h,
-      this.sprite.x, this.sprite.y, 26, 26
+      this.sprite.x, this.sprite.y + ((isSnakeGreen) ? 52 : 0), 26, 26
     );
   }
 }
