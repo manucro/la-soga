@@ -62,10 +62,12 @@ button:active { border: none; }
 .root-in-game { background: var(--background-game) !important; }
 
 #main-title {
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   font-size: var(--font-size-xxl);
+  padding: var(--spacing-bg);
 }
 #main-title-box {
   flex: 1;
@@ -78,7 +80,10 @@ button:active { border: none; }
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
+  width: 100%;
   align-items: center;
+  background-color: var(--modal-color);
+  border-radius: var(--spacing-sm);
 }
 .main-title-button {
   width: 50%;
@@ -183,9 +188,11 @@ button:active { border: none; }
   user-select: none;
 }
 .level-locked {
-  cursor: normal !important;
+  cursor: default !important;
   filter: brightness(75%);
 }
+.level-locked:hover { filter: brightness(75%) !important; }
+.level-locked:active { border-bottom: var(--spacing-xs) solid var(--button-highlight) !important; }
 .level-locked-icon {
   width: var(--spacing-bg);
   height: var(--spacing-bg);
