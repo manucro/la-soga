@@ -208,7 +208,7 @@ class Bullet extends GameObject {
     const playerBottom = playerObj.y + (playerObj.h / boxSize);
     this.x += this.speed * this.factorX * deltaTime;
     this.y += this.speed * this.factorY * deltaTime;
-    if (this.y * boxSize > canvas.height || this.y * boxSize < 0) deleteGameInstance(this);
+    if (this.y * boxSize > canvas.height || this.y * boxSize < -1) deleteGameInstance(this);
     this.angle += this.speed * deltaTime;
     if (
       playerObj.x <= this.x + this.w / boxSize / 2 && playerRight >= this.x + this.w / boxSize / 2 &&

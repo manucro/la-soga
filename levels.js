@@ -310,7 +310,7 @@ const levels = {
 
 function generateEnemy() {
   const bulletX = Math.floor(Math.random() * canvas.width / boxSize);
-  const bulletY = (Math.random() > 0.5) ? 1 : levelDimensions[1] - 1;
+  const bulletY = (Math.random() > 0.5) ? 0 : levelDimensions[1] - 1;
   const enemyDirection = Math.atan((playerObj.y - bulletY) / (playerObj.x - bulletX)) + ((bulletX > playerObj.x) ? Math.PI : 0);
   const enemySpeed = bulletSpeedBase + Math.floor(Math.random() * bulletSpeedVariation);
   addGameInstance(Bullet, [bulletX, bulletY, boxSize * 2, boxSize * 2, enemyDirection, enemySpeed]);
