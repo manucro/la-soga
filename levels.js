@@ -50,7 +50,6 @@ const levels = {
         }, 20000);
       }]]
     ],
-    'unlocked': true,
     'completed': false,
     'screens': [ 
       [
@@ -103,7 +102,6 @@ const levels = {
         [[0, 13], [1, 13], [1, 12], [1, 11], [1, 10], [1, 9], [1, 8], [2, 8], [3, 8], [4, 8]]
       ]]
     ],
-    'unlocked': true,
     'completed': false,
     'screens': [ 
       [
@@ -152,7 +150,6 @@ const levels = {
         [[0, 13], [1, 13], [1, 12], [1, 11], [1, 10], [1, 9], [1, 8], [2, 8], [3, 8], [4, 8]]
       ]]
     ],
-    'unlocked': true,
     'completed': false,
     'screens': [ 
       [
@@ -191,7 +188,7 @@ const levels = {
       isSnakeGreen = true;
       bulletSpeedBase = 2;
       bulletSpeedVariation = 3;
-      enemyIntervalFrec = 500;
+      enemyIntervalFrec = 750;
       snakeDelay = 30;
       snakeObj = inGameObj[1];
       dataElement.style.opacity = '1';
@@ -208,7 +205,6 @@ const levels = {
         [[0, 13], [1, 13], [1, 12], [1, 11], [1, 10], [1, 9], [1, 8], [2, 8], [3, 8], [4, 8]]
       ]]
     ],
-    'unlocked': true,
     'completed': false,
     'screens': [ 
       [
@@ -280,7 +276,6 @@ const levels = {
       timerElement.style.opacity = '1';
     },
     'objects': [],
-    'unlocked': true,
     'completed': false,
     'screens': [ 
       [

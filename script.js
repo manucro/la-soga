@@ -355,19 +355,34 @@ const backTitleAction = () => {
 }
 
 function updateLevelSelectorLevels() {
+  levelSelectorBox.innerHTML = '';
   const levelElements = document.createDocumentFragment();
   const keys = Object.keys(levels);
-  keys.forEach(key => {
+  keys.forEach((key, i) => {
     const l = document.createElement('button');
     l.type = 'button';
     l.classList.add('level');
-    const text = (parseInt(key) + 1).toString();
-    l.innerText = (key < 9) ? `0${text}` : text;
-    const lT = document.createElement('div');
-    lT.classList.add('level-tooltip');
-    lT.innerText = levels[key].name;
-    l.appendChild(lT);
-    l.addEventListener('click', () => selectLevel(levels[key]));
+
+    const levelUnlocked = (levels[keys[i] - 1]) ? levels[keys[i] - 1].completed : true;
+    if (levelUnlocked) {
+      // Nivel desbloqueado
+      const text = (parseInt(key) + 1).toString();
+      l.innerText = (key < 9) ? `0${text}` : text;
+      const lT = document.createElement('div');
+      lT.classList.add('level-tooltip');
+      lT.innerText = levels[key].name;
+      l.appendChild(lT);
+      l.addEventListener('click', () => selectLevel(levels[key]));
+    } else {
+      // Nivel bloqueado
+      l.classList.add('level-locked');
+      const levelIcon = document.createElement('img');
+      levelIcon.classList.add('level-locked-icon');
+      levelIcon.src = './src/lock.svg';
+      levelIcon.alt = 'unlocked';
+      l.appendChild(levelIcon);
+    }
+
     levelElements.appendChild(l);
   });
   levelSelectorBox.appendChild(levelElements);
@@ -551,6 +566,7 @@ function gameWin() {
   clearInterval(timeInterval);
   clearInterval(inGameEnemyInterval);
   isInGame = false;
+  actualLevelObj.completed = true;
   appearGameModal('Nivel completado', 'Siguiente');
 }
 function gameLose() {
@@ -565,6 +581,7 @@ function gameClose() {
   dialogQuery = 0;
   dataElement.style.opacity = '0';
   canvas.style.filter = 'brightness(100%)';
+  updateLevelSelectorLevels();
   levelFinalAction();
 }
 function gameRestart() {

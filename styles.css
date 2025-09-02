@@ -182,6 +182,14 @@ button:active { border: none; }
   cursor: pointer;
   user-select: none;
 }
+.level-locked {
+  cursor: normal !important;
+  filter: brightness(75%);
+}
+.level-locked-icon {
+  width: var(--spacing-bg);
+  height: var(--spacing-bg);
+}
 .level-tooltip {
   display: none;
   justify-content: center;
